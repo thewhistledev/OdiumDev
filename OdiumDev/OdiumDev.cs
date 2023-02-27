@@ -25,14 +25,15 @@ namespace OdiumDev
         /// </summary>
         /// <param name="level">Provide 'error' as param for crashdump or just put string empty for no crash dump.</param>
         /// <param name="moduleName">Module that threw the error. (Ex. Form1). Its really just an identifier for the specific function that caused the error.</param>
-        /// <param name="message">The error message to be supplied, this shows in the log file and also the crashdump.</param>
+        /// <param name="message">Message to be displayed in log. </param>
         /// <param name="errorException">This is an optional parameter, include this parameter if you want a crashdump otherwise it won't generate one.</param>
-        public static void Log(string level, string moduleName, string message, [Optional] Exception errorException)
+        /// <typeparam name="T">The data type of the message. ex. <string>, <int>, <object> </typeparam>
+        public static void Log<T>(string level, string moduleName, T message, [Optional] Exception errorException)
         {
             lock (_lockObject)
             {
                 string threadName = GetThreadName();
-                string logMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm}] [{threadName}] [{level.ToUpper()}] [{moduleName}] {message}";
+                string logMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm}] [{threadName}] [{level.ToUpper()}] [{moduleName}] {message.ToString()}";
 
                 _logMessages.Add(logMessage);
 
@@ -57,7 +58,7 @@ namespace OdiumDev
                             StreamWriter sw = new StreamWriter(fs);
 
                             // Write the stack trace and error information to the crash dump file
-                            Exception ex = new Exception(message);
+                            Exception ex = new Exception(message.ToString());
                             sw.WriteLine($"Exception Message: {ex.Message}");
                             sw.WriteLine($"Exception Stack Trace: {ex.StackTrace}");
                             sw.Close();
@@ -75,19 +76,22 @@ namespace OdiumDev
         /// Allows the user to copy log file to a custom directory. (Does not delete the original file).
         /// </summary>
         /// <param name="path">Specify the path you want to copy it to.</param>
-        public static void SaveLogs(string path)
+        public static bool SaveLogs(string path)
         {
             lock (_lockObject)
             {
                 try
                 {
+                    
                     // Write the contents of the log file to the specified path
                     File.Copy("log.txt", path, true);
                     Console.WriteLine($"Log file saved to {path}");
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error saving log file: {ex.Message}");
+                    return false;
                 }
             }
         }
@@ -100,5 +104,18 @@ namespace OdiumDev
             string threadId = Thread.CurrentThread.Name;
             return $"{threadId}";
         }
+
+        private static string GetThreadID()
+        {
+            string threadId = Thread.CurrentThread.ManagedThreadId.ToString();
+            return $"{threadId}";
+        }
+
+        private enum LogLevel
+        {
+            Error,
+            Info
+        }
+
     }
 }

@@ -3,8 +3,8 @@
 
 This is a simple logger library for C# applications. It provides a Logger class with two methods: `Log()` and `SaveLogs()`.
 
-# `Log()` Function
-The `Log()` method allows you to log messages with different levels of severity, along with the name of the module where the message originated. Here's an example of how to use it:
+# `Log<T>(string level, string moduleName, T message, [Optional] Exception errorException)` Function
+The `Log<T>()` method allows you to log messages with different levels of severity, along with the name of the module where the message originated. Here's an example of how to use it:
 
 ```
 Logger.Log("error", "MyModule", "This is an error message");
